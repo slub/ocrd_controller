@@ -1,0 +1,3 @@
+# only for host-local installation
+authorized_keys
+Makefile
