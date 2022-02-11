@@ -41,7 +41,7 @@ run: $(DATA) $(MODELS)
 	--name ocrd_controller \
 	-v $(DATA):/data \
 	-v $(MODELS):/models \
-	--mount type=bind,source=$(KEYS),target=/root/.ssh/authorized_keys \
+	--mount type=bind,source=$(KEYS),target=/root/authorized_keys \
 	$(TAGNAME)
 
 .PHONY: build run help
