@@ -16,9 +16,9 @@ Build or pull the Docker image:
 
     make build # or docker pull
 
-Then run the container – providing host-side directories for the volumes `DATA` and `MODELS`, but also a (multi-line) string `KEYS` with public key credentials:
+Then run the container – providing host-side directories for the volumes `DATA` and `MODELS`, but also a file `KEYS` with public key credentials:
 
-    make run DATA=/mnt/workspaces MODELS=~/.local/share KEYS=$(cat ~/.ssh/id_rsa.pub) PORT=8022
+    make run DATA=/mnt/workspaces MODELS=~/.local/share KEYS=~/.ssh/id_rsa.pub PORT=8022
 
 Then you can log in from remote (but let's use `localhost` for the example):
 

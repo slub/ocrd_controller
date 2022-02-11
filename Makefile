@@ -1,4 +1,5 @@
 TAGNAME ?= bertsky/ocrd_controller
+SHELL = /bin/bash
 
 build:
 	docker build -t $(TAGNAME) .
@@ -12,7 +13,7 @@ Targets:
 Variables:
 	- TAGNAME	name of Docker image to build/run
 	currently: "$(TAGNAME)"
-	- KEYS		content of authorized_keys (newline-separated)
+	- KEYS		file to mount as .ssh/authorized_keys
 	currently: "$(KEYS)"
 	- DATA		host directory to mount into `/data`
 	currently: "$(CURDIR)"
@@ -27,7 +28,7 @@ endef
 export HELP
 help: ; @eval "$$HELP"
 
-KEYS ?= $(shell cat $(HOME)/.ssh/id_rsa.pub)
+KEYS ?= $(firstword $(wildcard $(HOME)/.ssh/authorized_keys* $(HOME)/.ssh/id_*.pub))
 DATA ?= $(CURDIR)
 MODELS ?= $(HOME)
 PORT ?= 8022
@@ -40,7 +41,7 @@ run: $(DATA) $(MODELS)
 	--name ocrd_controller \
 	-v $(DATA):/data \
 	-v $(MODELS):/models \
-	-e KEYS='$(KEYS)' \
+	--mount type=bind,source=$(KEYS),target=/root/.ssh/authorized_keys \
 	$(TAGNAME)
 
 .PHONY: build run help
