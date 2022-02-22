@@ -46,6 +46,7 @@ EXPOSE 22
 WORKDIR /build
 
 RUN ln /usr/bin/python3 /usr/bin/python
+# prevent make from updating the git modules automatically
 ENV NO_UPDATE=1
 # update to sbb_binarization#31 (setup during init)
 RUN git -C sbb_binarization fetch origin pull/31/head:setup-init
@@ -55,6 +56,7 @@ RUN make -W sbb_binarization ocrd-sbb-binarize
 RUN git -C core fetch origin pull/652/head:workflow-server
 RUN git -C core checkout workflow-server
 RUN make -C core install PIP_INSTALL="pip install -e"
+RUN for venv in /usr/local/sub-venv/*; do source $venv/bin/activate && make -C core install PIP_INSTALL="pip install -e"; done
 # configure writing to ocrd.log for profiling
 COPY ocrd_logging.conf /etc
 
