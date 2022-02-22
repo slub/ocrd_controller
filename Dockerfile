@@ -12,9 +12,11 @@ ENV PREFIX=$PREFIX
 ENV VIRTUAL_ENV=$VIRTUAL_ENV
 ENV HOME=/
 
+# must mount a host-side directory for models
 VOLUME /models
 ENV XDG_DATA_HOME=/models
-ENV TESSDATA_PREFIX=/models/ocrd-resources/ocrd-tesserocr-recognize
+ENV XDG_CONFIG_HOME=/models
+ENV TESSDATA_PREFIX=$XDG_DATA_HOME/ocrd-resources/ocrd-tesserocr-recognize
 
 # make apt run non-interactive during build
 ENV DEBIAN_FRONTEND noninteractive
