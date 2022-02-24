@@ -12,11 +12,13 @@ ENV PREFIX=$PREFIX
 ENV VIRTUAL_ENV=$VIRTUAL_ENV
 ENV HOME=/
 
-# must mount a host-side directory for models
+# must mount a host-side directory for ocrd-resources
 VOLUME /models
 ENV XDG_DATA_HOME=/models
-ENV XDG_CONFIG_HOME=/models
 ENV TESSDATA_PREFIX=$XDG_DATA_HOME/ocrd-resources/ocrd-tesserocr-recognize
+# must mount a host-side directory for ocrd/resource.yml
+VOLUME /config
+ENV XDG_CONFIG_HOME=/config
 
 # make apt run non-interactive during build
 ENV DEBIAN_FRONTEND noninteractive
@@ -27,16 +29,14 @@ RUN apt-get update && \
     apt-get clean
 
 # run OpenSSH server
-RUN echo "for root login only" > /etc/nologin
-# default sshd_config#PermitRootLogin is prohibit-password
-# so we only need to bind-mount root's ~/.ssh/authorized_keys file:
-# --mount type=bind,source=...,destination=/.ssh/authorized_keys
 RUN ssh-keygen -A
-RUN mkdir /run/sshd /root/.ssh
+RUN mkdir /run/sshd /.ssh
 RUN echo Banner none >> /etc/ssh/sshd_config
 RUN echo PrintMotd no >> /etc/ssh/sshd_config
 RUN echo PermitUserEnvironment yes >> /etc/ssh/sshd_config
 RUN echo PermitUserRC yes >> /etc/ssh/sshd_config
+RUN echo X11Forwarding no >> /etc/ssh/sshd_config
+RUN echo AllowUsers ocrd >> /etc/ssh/sshd_config
 RUN echo "cd /data" >> /etc/profile
 RUN /usr/sbin/sshd -t
 COPY start-sshd.sh /usr/bin

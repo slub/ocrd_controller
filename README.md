@@ -12,33 +12,66 @@
 
 ## Usage
 
+### Building
+
 Build or pull the Docker image:
 
-    make build # or docker pull
+    make build # or docker pull bertsky/ocrd_controller
 
-Then run the container – providing host-side directories for the volumes `DATA` and `MODELS`, but also a file `KEYS` with public key credentials:
+### Starting and mounting
+
+Then run the container – providing host-side directories for the volumes `DATA`, `MODELS` and `CONFIG` …
+
+ * `DATA`: directory for dataprocessing (including images or existing workspaces),  
+   defaults to current working directory
+ * `MODELS`: directory for persistent storage of processor [resource files](https://ocr-d.de/en/models),  
+   defaults to `~/.local/share`; models will be under `./ocrd-resources/*`
+ * `CONFIG`: directory for persistent storage of processor [resource list](https://ocr-d.de/en/models),  
+   defaults to `~/.config`; file will be under `./ocrd/resources.yml`
+
+… but also a file `KEYS` with public key credentials:
 
     make run DATA=/mnt/workspaces MODELS=~/.local/share KEYS=~/.ssh/id_rsa.pub PORT=8022
 
-Then you can log in from remote (but let's use `localhost` for the example):
+### Model downloading
 
-    ssh -p 8022 localhost "ocrd-import -P some-document"
+Then you can log in as user `ocrd` from remote (but let's use `localhost` for the example):
+
+    ssh -p 8022 ocrd@localhost "ocrd-import -P some-document"
 
 For actual processing, you will first need to download some models into your `MODELS` volume:
 
-    ssh -p 8022 localhost "ocrd resmgr download ocrd-tesserocr-recognize *"
+    ssh -p 8022 ocrd@localhost "ocrd resmgr download ocrd-tesserocr-recognize *"
+
+### Processing
 
 Subsequently, you can use these models on your `DATA` files:
 
-    ssh -p 8022 localhost "ocrd process -m some-document/mets.xml 'tesserocr-recognize -P segmentation_level region -P model Fraktur'"
+    ssh -p 8022 ocrd@localhost "ocrd process -m some-document/mets.xml 'tesserocr-recognize -P segmentation_level region -P model Fraktur'"
     # or equivalently:
-    ssh -p 8022 localhost "ocrd-tesserocr-recognize -m some-document/mets.xml -P segmentation_level region -P model Fraktur"
+    ssh -p 8022 ocrd@localhost "ocrd-tesserocr-recognize -m some-document/mets.xml -P segmentation_level region -P model Fraktur"
+
+### Data transfer
+
+If your data files cannot be directly mounted on the host (not even as a network share), then you can use `scp` or `sftp` to transfer them to the server:
+
+    scp -P 8022 -r some-directory ocrd@localhost:/data
+    echo put some-directory /data | sftp -P 8022 ocrd@localhost
+
+Analogously, to transfer the results back:
+
+    scp -P 8022 -r ocrd@localhost:/data/some-directory .
+    echo get /data/some-directory | sftp -P 8022 ocrd@localhost
+
+### Parallel options
 
 For parallel processing, you can either
 - run multiple processes on a single controller by
   - logging in multiple times, or 
   - issueing parallel commands (via basic shell scripting or [ocrd-make](https://bertsky.github.io/workflow-configuration) calls)
 - run processes on multiple controllers.
+
+### Visualization
 
 Apart from the SSH server, this currently also exposes a [webserver](https://github.com/OCR-D/ocrd-website/wiki/browse-ocrd-in-Docker) for the [OCR-D browser](https://github.com/hnesk/browse-ocrd) installed in the container:
 
