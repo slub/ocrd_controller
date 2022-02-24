@@ -56,7 +56,7 @@ RUN make -W sbb_binarization ocrd-sbb-binarize
 RUN git -C core fetch origin pull/652/head:workflow-server
 RUN git -C core checkout workflow-server
 RUN make -C core install PIP_INSTALL="pip install -e"
-RUN for venv in /usr/local/sub-venv/*; do source $venv/bin/activate && make -C core install PIP_INSTALL="pip install -e"; done
+RUN for venv in /usr/local/sub-venv/*; do . $venv/bin/activate && make -C core install PIP_INSTALL="pip install -e"; done
 # configure writing to ocrd.log for profiling
 COPY ocrd_logging.conf /etc
 
