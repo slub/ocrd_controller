@@ -5,10 +5,21 @@
 1. In the simplest (and current) form, the controller will be a SSH login server for a full [command-line](https://ocr-d.de/en/spec/cli) [OCR-D](https://ocr-d.de) [installation](https://github.com/OCR-D/ocrd_all). 
    Files must be mounted locally (if they are network shares, this must be done on the host side running the container).
 2. Next, the SSH server can also dynamically receive and send data.
-3. The first true network implementation will offer an HTTP interface for processing (like the workflow server).
+3. The first true network implementation will offer an HTTP interface for processing (like the [workflow server](https://github.com/OCR-D/core/pull/652)).
 4. From there, the actual processing could be further delegated into different processing servers.
 5. A more powerful workflow engine would then offer instantiating different workflows, and monitoring jobs.
 6. In the final form, the controller will implement (most parts of) the OCR-D Web API.
+
+ * [Usage](#usage)
+   * [Building](#building)
+   * [Starting and mounting](#starting-and-mounting)
+   * [General management](#general-management)
+   * [Processing](#processing)
+     * [Workflow server](#workflow-server)
+   * [Data transfer](#data-transfer)
+   * [Parallel options](#parallel-options)
+   * [Visualization](#visualization)
+
 
 ## Usage
 
@@ -20,7 +31,7 @@ Build or pull the Docker image:
 
 ### Starting and mounting
 
-Then run the container – providing host-side directories for the volumes `DATA`, `MODELS` and `CONFIG` …
+Then run the container – providing **host-side directories** for the volumes `DATA`, `MODELS` and `CONFIG` …
 
  * `DATA`: directory for dataprocessing (including images or existing workspaces),  
    defaults to current working directory
@@ -29,17 +40,38 @@ Then run the container – providing host-side directories for the volumes `DATA
  * `CONFIG`: directory for persistent storage of processor [resource list](https://ocr-d.de/en/models),  
    defaults to `~/.config`; file will be under `./ocrd/resources.yml`
 
-… but also a file `KEYS` with public key credentials:
+… but also a file `KEYS` with public key **credentials**, and (optionally) some **environment variables** …
+
+ * `UID`: numerical user identifier to be used by programs in the container  
+    (will affect the files modified/created); defaults to current user
+ * `GID`: numerical group identifier to be used by programs in the container  
+    (will affect the files modified/created); defaults to current group
+ * `UMASK`: numerical user mask to be used by programs in the container  
+    (will affect the files modified/created); defaults to 0002
+ * `PORT`: numerical TCP port to expose the SSH server on the host side  
+    defaults to 8022 (for non-priviledged access)
+ * `GTKPORT` numerical TCP port to expose the broadwayd server on the host side  
+    defaults to 8085 (for non-priviledged access)
+
+… thus, for **example**:
 
     make run DATA=/mnt/workspaces MODELS=~/.local/share KEYS=~/.ssh/id_rsa.pub PORT=8022
 
-### Model downloading
+### General management
 
-Then you can log in as user `ocrd` from remote (but let's use `localhost` for the example):
+Then you can **log in** as user `ocrd` from remote (but let's use `localhost` in the following – 
+without loss of generality):
+
+    ssh -p 8022 ocrd@localhost bash -i
+
+Unless you already have the data in [workspaces](https://ocr-d.de/en/spec/glossary#workspace), 
+you need to [**create workspaces**](https://ocr-d.de/en/user_guide#preparing-a-workspace) prior to processing.
+For example:
 
     ssh -p 8022 ocrd@localhost "ocrd-import -P some-document"
 
-For actual processing, you will first need to download some models into your `MODELS` volume:
+For actual processing, you will first need to [**download some models**](https://ocr-d.de/en/models)
+into your `MODELS` volume:
 
     ssh -p 8022 ocrd@localhost "ocrd resmgr download ocrd-tesserocr-recognize *"
 
@@ -50,6 +82,17 @@ Subsequently, you can use these models on your `DATA` files:
     ssh -p 8022 ocrd@localhost "ocrd process -m some-document/mets.xml 'tesserocr-recognize -P segmentation_level region -P model Fraktur'"
     # or equivalently:
     ssh -p 8022 ocrd@localhost "ocrd-tesserocr-recognize -m some-document/mets.xml -P segmentation_level region -P model Fraktur"
+
+#### Workflow server
+
+Currently, the OCR-D installation hosts an implementation of the [workflow server](https://github.com/OCR-D/core/pull/652), which can be used to significantly reduce initialization overhead when running the same workflow repeatedly on many workspaces (especially with GPU-bound processors):
+
+    ssh -p 8022 ocrd@localhost "ocrd workflow server -j 4 -t 120 'tesserocr-recognize -P segmentation_level region -P model Fraktur'"
+
+And subsequently:
+
+    ssh -p 8022 ocrd@localhost "ocrd workflow client process -m some-document/mets.xml"
+    ssh -p 8022 ocrd@localhost "ocrd workflow client process -m other-document/mets.xml"
 
 ### Data transfer
 
@@ -68,7 +111,10 @@ Analogously, to transfer the results back:
 For parallel processing, you can either
 - run multiple processes on a single controller by
   - logging in multiple times, or 
-  - issueing parallel commands (via basic shell scripting or [ocrd-make](https://bertsky.github.io/workflow-configuration) calls)
+  - issueing parallel commands – 
+    * via basic shell scripting
+    * via [ocrd-make](https://bertsky.github.io/workflow-configuration) calls
+    * via [`ocrd workflow server --processes`](#workflow-server) concurrency
 - run processes on multiple controllers.
 
 ### Visualization
