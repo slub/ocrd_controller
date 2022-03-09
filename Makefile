@@ -8,7 +8,8 @@ define HELP
 cat <<"EOF"
 Targets:
 	- build	(re)compile Docker image from sources
-	- run	start Docker container
+	- run	start up Docker container with SSH service
+	- test	check all installed processors
 
 Variables:
 	- TAGNAME	name of Docker image to build/run
@@ -31,6 +32,8 @@ Variables:
 	  currently: $(PORT)
 	- GTKPORT	TCP port for the (host-side) Broadwayd
 	  currently: $(GTKPORT)
+	- NETWORK	Docker network to use (manage via "docker network")
+	  currently: $(NETWORK)
 EOF
 endef
 export HELP
@@ -45,12 +48,15 @@ GID ?= $(shell id -g)
 UMASK ?= 0002
 PORT ?= 8022
 GTKPORT ?= 8085
+NETWORK ?= bridge
 # FIXME: map host to container UIDs so that logins will modify data on volumes with host UID not as root
 run: $(DATA) $(MODELS) $(KEYS)
 	docker run --rm \
 	-p $(PORT):22 \
 	-p $(GTKPORT):8085 \
+	-h ocrd_controller \
 	--name ocrd_controller \
+	--network=$(NETWORK) \
 	-v $(DATA):/data \
 	-v $(MODELS):/models \
 	-v $(CONFIG):/config \
@@ -58,4 +64,7 @@ run: $(DATA) $(MODELS) $(KEYS)
 	-e UID=$(UID) -e GID=$(GID) -e UMASK=$(UMASK) \
 	$(TAGNAME)
 
-.PHONY: build run help
+test:
+	ssh -Tn -p $(PORT) ocrd@localhost make -C /build check
+
+.PHONY: build run help test

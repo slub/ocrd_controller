@@ -53,6 +53,8 @@ Then run the container – providing **host-side directories** for the volumes �
     defaults to 8022 (for non-priviledged access)
  * `GTKPORT` numerical TCP port to expose the broadwayd server on the host side  
     defaults to 8085 (for non-priviledged access)
+ * `NETWORK` name of the Docker network to use  
+    defaults to `bridge` (the default Docker network)
 
 … thus, for **example**:
 
