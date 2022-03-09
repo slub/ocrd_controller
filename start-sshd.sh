@@ -2,7 +2,7 @@
 nohup broadwayd $BROADWAY_DISPLAY &
 cat /authorized_keys >> /.ssh/authorized_keys
 touch /.hushlogin
-set > /.ssh/environment
+set | fgrep -ve BASH > /.ssh/environment
 echo "cd /data" >> /.ssh/rc
 echo "umask $UMASK" >> /.ssh/rc
 chmod go-rwx /.ssh/*
