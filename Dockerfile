@@ -25,7 +25,7 @@ ENV DEBIAN_FRONTEND noninteractive
 
 # make apt system functional
 RUN apt-get update && \
-    apt-get install -y apt-utils wget git openssh-server  && \
+    apt-get install -y apt-utils wget git openssh-server rsyslog  && \
     apt-get clean
 
 # run OpenSSH server

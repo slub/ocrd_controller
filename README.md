@@ -18,6 +18,7 @@
      * [Workflow server](#workflow-server)
    * [Data transfer](#data-transfer)
    * [Parallel options](#parallel-options)
+   * [Logging](#logging)
    * [Visualization](#visualization)
 
 
@@ -31,16 +32,16 @@ Build or pull the Docker image:
 
 ### Starting and mounting
 
-Then run the container – providing **host-side directories** for the volumes `DATA`, `MODELS` and `CONFIG` …
+Then run the container – providing **host-side directories** for the volumes …
 
- * `DATA`: directory for dataprocessing (including images or existing workspaces),  
+ * `DATA`: directory for data processing (including images or existing workspaces),  
    defaults to current working directory
  * `MODELS`: directory for persistent storage of processor [resource files](https://ocr-d.de/en/models),  
    defaults to `~/.local/share`; models will be under `./ocrd-resources/*`
  * `CONFIG`: directory for persistent storage of processor [resource list](https://ocr-d.de/en/models),  
    defaults to `~/.config`; file will be under `./ocrd/resources.yml`
 
-… but also a file `KEYS` with public key **credentials**, and (optionally) some **environment variables** …
+… but also a file `KEYS` with public key **credentials** for log-in to the controller, and (optionally) some **environment variables** …
 
  * `UID`: numerical user identifier to be used by programs in the container  
     (will affect the files modified/created); defaults to current user
@@ -59,52 +60,52 @@ Then run the container – providing **host-side directories** for the volumes `
 
 ### General management
 
-Then you can **log in** as user `ocrd` from remote (but let's use `localhost` in the following – 
+Then you can **log in** as user `ocrd` from remote (but let's use `controller` in the following – 
 without loss of generality):
 
-    ssh -p 8022 ocrd@localhost bash -i
+    ssh -p 8022 ocrd@controller bash -i
 
 Unless you already have the data in [workspaces](https://ocr-d.de/en/spec/glossary#workspace), 
 you need to [**create workspaces**](https://ocr-d.de/en/user_guide#preparing-a-workspace) prior to processing.
 For example:
 
-    ssh -p 8022 ocrd@localhost "ocrd-import -P some-document"
+    ssh -p 8022 ocrd@controller "ocrd-import -P some-document"
 
 For actual processing, you will first need to [**download some models**](https://ocr-d.de/en/models)
 into your `MODELS` volume:
 
-    ssh -p 8022 ocrd@localhost "ocrd resmgr download ocrd-tesserocr-recognize *"
+    ssh -p 8022 ocrd@controller "ocrd resmgr download ocrd-tesserocr-recognize *"
 
 ### Processing
 
 Subsequently, you can use these models on your `DATA` files:
 
-    ssh -p 8022 ocrd@localhost "ocrd process -m some-document/mets.xml 'tesserocr-recognize -P segmentation_level region -P model Fraktur'"
+    ssh -p 8022 ocrd@controller "ocrd process -m some-document/mets.xml 'tesserocr-recognize -P segmentation_level region -P model Fraktur'"
     # or equivalently:
-    ssh -p 8022 ocrd@localhost "ocrd-tesserocr-recognize -m some-document/mets.xml -P segmentation_level region -P model Fraktur"
+    ssh -p 8022 ocrd@controller "ocrd-tesserocr-recognize -m some-document/mets.xml -P segmentation_level region -P model Fraktur"
 
 #### Workflow server
 
 Currently, the OCR-D installation hosts an implementation of the [workflow server](https://github.com/OCR-D/core/pull/652), which can be used to significantly reduce initialization overhead when running the same workflow repeatedly on many workspaces (especially with GPU-bound processors):
 
-    ssh -p 8022 ocrd@localhost "ocrd workflow server -j 4 -t 120 'tesserocr-recognize -P segmentation_level region -P model Fraktur'"
+    ssh -p 8022 ocrd@controller "ocrd workflow server -j 4 -t 120 'tesserocr-recognize -P segmentation_level region -P model Fraktur'"
 
 And subsequently:
 
-    ssh -p 8022 ocrd@localhost "ocrd workflow client process -m some-document/mets.xml"
-    ssh -p 8022 ocrd@localhost "ocrd workflow client process -m other-document/mets.xml"
+    ssh -p 8022 ocrd@controller "ocrd workflow client process -m some-document/mets.xml"
+    ssh -p 8022 ocrd@controller "ocrd workflow client process -m other-document/mets.xml"
 
 ### Data transfer
 
 If your data files cannot be directly mounted on the host (not even as a network share), then you can use `scp` or `sftp` to transfer them to the server:
 
-    scp -P 8022 -r some-directory ocrd@localhost:/data
-    echo put some-directory /data | sftp -P 8022 ocrd@localhost
+    scp -P 8022 -r some-directory ocrd@controller:/data
+    echo put some-directory /data | sftp -P 8022 ocrd@controller
 
 Analogously, to transfer the results back:
 
-    scp -P 8022 -r ocrd@localhost:/data/some-directory .
-    echo get /data/some-directory | sftp -P 8022 ocrd@localhost
+    scp -P 8022 -r ocrd@controller:/data/some-directory .
+    echo get /data/some-directory | sftp -P 8022 ocrd@controller
 
 ### Parallel options
 
@@ -117,11 +118,17 @@ For parallel processing, you can either
     * via [`ocrd workflow server --processes`](#workflow-server) concurrency
 - run processes on multiple controllers.
 
+### Logging
+
+All logs are accumulated on standard output, which can be inspected via Docker:
+
+    docker logs ocrd_controller
+
 ### Visualization
 
 Apart from the SSH server, this currently also exposes a [webserver](https://github.com/OCR-D/ocrd-website/wiki/browse-ocrd-in-Docker) for the [OCR-D browser](https://github.com/hnesk/browse-ocrd) installed in the container:
 
     browse-ocrd some-document/mets.xml
 
-You can then access `localhost:8085` with your browser for the GUI.
+You can then access `controller:8085` with your browser for the GUI.
 
