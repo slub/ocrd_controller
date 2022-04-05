@@ -51,8 +51,6 @@ Then run the container â€“ providing **host-side directories** for the volumes â
     (will affect the files modified/created); defaults to 0002
  * `PORT`: numerical TCP port to expose the SSH server on the host side  
     defaults to 8022 (for non-priviledged access)
- * `GTKPORT` numerical TCP port to expose the broadwayd server on the host side  
-    defaults to 8085 (for non-priviledged access)
  * `NETWORK` name of the Docker network to use  
     defaults to `bridge` (the default Docker network)
 
@@ -125,12 +123,3 @@ For parallel processing, you can either
 All logs are accumulated on standard output, which can be inspected via Docker:
 
     docker logs ocrd_controller
-
-### Visualization
-
-Apart from the SSH server, this currently also exposes a [webserver](https://github.com/OCR-D/ocrd-website/wiki/browse-ocrd-in-Docker) for the [OCR-D browser](https://github.com/hnesk/browse-ocrd) installed in the container:
-
-    browse-ocrd some-document/mets.xml
-
-You can then access `controller:8085` with your browser for the GUI.
-

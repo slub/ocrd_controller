@@ -1,5 +1,4 @@
 #! /bin/bash
-nohup broadwayd $BROADWAY_DISPLAY &
 cat /authorized_keys >> /.ssh/authorized_keys
 touch /.hushlogin
 set | fgrep -ve BASH > /.ssh/environment

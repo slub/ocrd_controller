@@ -30,8 +30,6 @@ Variables:
 	  currently: $(UMASK)
 	- PORT		TCP port for the (host-side) sshd server
 	  currently: $(PORT)
-	- GTKPORT	TCP port for the (host-side) Broadwayd
-	  currently: $(GTKPORT)
 	- NETWORK	Docker network to use (manage via "docker network")
 	  currently: $(NETWORK)
 EOF
@@ -47,13 +45,11 @@ UID ?= $(shell id -u)
 GID ?= $(shell id -g)
 UMASK ?= 0002
 PORT ?= 8022
-GTKPORT ?= 8085
 NETWORK ?= bridge
 # FIXME: map host to container UIDs so that logins will modify data on volumes with host UID not as root
 run: $(DATA) $(MODELS) $(KEYS)
 	docker run --rm \
 	-p $(PORT):22 \
-	-p $(GTKPORT):8085 \
 	-h ocrd_controller \
 	--name ocrd_controller \
 	--network=$(NETWORK) \

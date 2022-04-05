@@ -68,18 +68,6 @@ RUN make -C workflow-configuration install
 # configure writing to ocrd.log for profiling
 COPY ocrd_logging.conf /etc
 
-# add ocrd_browser via Broadway HTTP bridge
-COPY ocrd-browser $PREFIX/bin/ocrd-browser
-RUN git clone https://github.com/hnesk/browse-ocrd
-RUN make -C browse-ocrd deps-ubuntu
-RUN pip install --ignore-installed -U PyGObject
-RUN make -C browse-ocrd deps
-RUN pip install -e browse-ocrd
-RUN apt-get install -y libgtk-3-bin
-ENV GDK_BACKEND broadway
-ENV BROADWAY_DISPLAY :5
-EXPOSE 8085
-
 # make apt run interactive during logins
 ENV DEBIAN_FRONTEND teletype
 

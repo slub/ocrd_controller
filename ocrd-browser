@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-
-pgrep broadwayd || broadwayd :5 &
-
-browse-ocrd "$@"
