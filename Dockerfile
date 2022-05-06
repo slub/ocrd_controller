@@ -48,23 +48,14 @@ WORKDIR /build
 RUN ln /usr/bin/python3 /usr/bin/python
 # prevent make from updating the git modules automatically
 ENV NO_UPDATE=1
-# install OCR-D/ocrd_fileformat#39
-RUN git -C ocrd_fileformat fetch origin pull/39/head:pr-39
-RUN git -C ocrd_fileformat checkout pr-39
-RUN make -C ocrd_fileformat install
 #
-# update to sbb_binarization#31 (setup during init)
-RUN git -C sbb_binarization fetch origin pull/31/head:setup-init
-RUN git -C sbb_binarization checkout setup-init
-RUN make -W sbb_binarization ocrd-sbb-binarize
 # update to core#652 (workflow server)
 RUN git -C core fetch origin pull/652/head:workflow-server
 RUN git -C core checkout workflow-server
-RUN make -C core install PIP_INSTALL="pip install -e"
-RUN for venv in /usr/sub-venv/*; do . $venv/bin/activate && make -C core install PIP_INSTALL="pip install -e"; done
+RUN for venv in $VIRTUAL_ENV $VIRTUAL_ENV/sub-venv/*; do . $venv/bin/activate && make -C core install PIP_INSTALL="pip install -e"; done
 # update ocrd-import
 RUN git -C workflow-configuration pull origin master
-RUN make -C workflow-configuration install
+RUN . $VIRTUAL_ENV/bin/activate && make -C workflow-configuration install
 # configure writing to ocrd.log for profiling
 COPY ocrd_logging.conf /etc
 
