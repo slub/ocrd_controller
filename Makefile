@@ -62,9 +62,10 @@ run: $(DATA) $(MODELS) $(KEYS)
 	-v $(DATA):/data \
 	-v $(MODELS):/models \
 	-v $(CONFIG):/config \
+	--tmpfs /tmp:rw,noexec,nosuid,nodev,size=2g \
 	--mount type=bind,source=$(KEYS),target=/authorized_keys \
 	-e UID=$(UID) -e GID=$(GID) -e UMASK=$(UMASK) -e WORKERS=$(WORKERS) \
-	$(TAGNAME)
+	--cpus=$(WORKERS) --gpus=all -d $(TAGNAME)
 
 test:
 	ssh -Tn -p $(PORT) ocrd@localhost make -C /build check
