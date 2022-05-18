@@ -43,6 +43,8 @@ Then run the container – providing **host-side directories** for the volumes �
 
 … but also a file `KEYS` with public key **credentials** for log-in to the controller, and (optionally) some **environment variables** …
 
+ * `WORKERS`: number of parallel jobs (i.e. concurrent login sessions for `ocrd`)
+    (should be set to match the available computing resources)
  * `UID`: numerical user identifier to be used by programs in the container  
     (will affect the files modified/created); defaults to current user
  * `GID`: numerical group identifier to be used by programs in the container  
@@ -56,7 +58,7 @@ Then run the container – providing **host-side directories** for the volumes �
 
 … thus, for **example**:
 
-    make run DATA=/mnt/workspaces MODELS=~/.local/share KEYS=~/.ssh/id_rsa.pub PORT=8022
+    make run DATA=/mnt/workspaces MODELS=~/.local/share KEYS=~/.ssh/id_rsa.pub PORT=8022 WORKERS=3
 
 ### General management
 
@@ -86,7 +88,9 @@ Subsequently, you can use these models on your `DATA` files:
 
 #### Workflow server
 
-Currently, the OCR-D installation hosts an implementation of the [workflow server](https://github.com/OCR-D/core/pull/652), which can be used to significantly reduce initialization overhead when running the same workflow repeatedly on many workspaces (especially with GPU-bound processors):
+Currently, the OCR-D installation hosts an implementation of the [workflow server](https://github.com/OCR-D/core/pull/652),
+which can be used to significantly reduce initialization overhead when running the same workflow repeatedly
+on many workspaces (especially with GPU-bound processors):
 
     ssh -p 8022 ocrd@controller "ocrd workflow server -j 4 -t 120 'tesserocr-recognize -P segmentation_level region -P model Fraktur'"
 
@@ -97,13 +101,16 @@ And subsequently:
 
 ### Data transfer
 
-If your data files cannot be directly mounted on the host (not even as a network share), then you can use `scp` or `sftp` to transfer them to the server:
+If your data files cannot be directly mounted on the host (not even as a network share),
+then you can use `rsync`, `scp` or `sftp` to transfer them to the server:
 
+    rsync --port 8022 -av some-directory ocrd@controller:/data
     scp -P 8022 -r some-directory ocrd@controller:/data
     echo put some-directory /data | sftp -P 8022 ocrd@controller
 
 Analogously, to transfer the results back:
 
+    rsync --port 8022 -av ocrd@controller:/data/some-directory .
     scp -P 8022 -r ocrd@controller:/data/some-directory .
     echo get /data/some-directory | sftp -P 8022 ocrd@controller
 
@@ -117,6 +124,10 @@ For parallel processing, you can either
     * via [ocrd-make](https://bertsky.github.io/workflow-configuration) calls
     * via [`ocrd workflow server --processes`](#workflow-server) concurrency
 - run processes on multiple controllers.
+
+Note: internally, `WORKERS` is implemented as a (GNU parallel-based) semaphore
+wrapping the SSH sessions inside blocking `sem --fg` calls within .ssh/rc.
+Thus, commands will get queued but not processed until a 'worker' is free.
 
 ### Logging
 

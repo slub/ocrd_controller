@@ -5,6 +5,13 @@ ARG VERSION=maximum-git
 FROM ocrd/all:$VERSION
 
 MAINTAINER robert.sachunsky@slub-dresden.de
+ARG VCS_REF
+ARG BUILD_DATE
+LABEL \
+    maintainer="https://slub-dresden.de" \
+    org.label-schema.vcs-ref=$VCS_REF \
+    org.label-schema.vcs-url="https://github.com/bertsky/ocrd_controller" \
+    org.label-schema.build-date=$BUILD_DATE
 
 # keep PREFIX and VIRTUAL_ENV from ocrd/all
 # but export them for COPY etc
@@ -37,9 +44,11 @@ RUN echo PermitUserEnvironment yes >> /etc/ssh/sshd_config
 RUN echo PermitUserRC yes >> /etc/ssh/sshd_config
 RUN echo X11Forwarding no >> /etc/ssh/sshd_config
 RUN echo AllowUsers ocrd >> /etc/ssh/sshd_config
+# chdir to the data volume (so relative paths work as expected)
 RUN echo "cd /data" >> /etc/profile
+RUN echo 'umask $UMASK' >> /etc/profile
 RUN /usr/sbin/sshd -t
-COPY start-sshd.sh /usr/bin
+COPY start-sshd.sh /usr/bin/
 CMD ["/usr/bin/start-sshd.sh"]
 EXPOSE 22
 

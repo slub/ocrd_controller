@@ -2,7 +2,10 @@ TAGNAME ?= bertsky/ocrd_controller
 SHELL = /bin/bash
 
 build:
-	docker build -t $(TAGNAME) .
+	docker build \
+	--build-arg VCS_REF=$$(git rev-parse --short HEAD) \
+	--build-arg BUILD_DATE=$$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
+	--network=host -t $(TAGNAME) .
 
 define HELP
 cat <<"EOF"
@@ -32,6 +35,8 @@ Variables:
 	  currently: $(PORT)
 	- NETWORK	Docker network to use (manage via "docker network")
 	  currently: $(NETWORK)
+	- WORKERS	number of concurrent jobs allowed in logins
+	  currently: $(WORKERS)
 EOF
 endef
 export HELP
@@ -46,6 +51,7 @@ GID ?= $(shell id -g)
 UMASK ?= 0002
 PORT ?= 8022
 NETWORK ?= bridge
+WORKERS ?= 1
 # FIXME: map host to container UIDs so that logins will modify data on volumes with host UID not as root
 run: $(DATA) $(MODELS) $(KEYS)
 	docker run --rm \
@@ -57,7 +63,7 @@ run: $(DATA) $(MODELS) $(KEYS)
 	-v $(MODELS):/models \
 	-v $(CONFIG):/config \
 	--mount type=bind,source=$(KEYS),target=/authorized_keys \
-	-e UID=$(UID) -e GID=$(GID) -e UMASK=$(UMASK) \
+	-e UID=$(UID) -e GID=$(GID) -e UMASK=$(UMASK) -e WORKERS=$(WORKERS) \
 	$(TAGNAME)
 
 test:
