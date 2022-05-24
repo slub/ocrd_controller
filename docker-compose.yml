@@ -39,4 +39,9 @@ services:
         reservations:
           devices:
             - capabilities: [gpu]
-              count: 1 # share GPU device across workers (for multi-GPU: use swarm)
+            # we want to reserve _up to_ 1 device
+            # (not more, because 1 can typically be shared across workers already,
+            #  and for physical multi-GPU, we should instead use swarm anyway)
+            # but the semantics of "count" is _at least_ unfortunately
+            # (which would fail on CPU-only systems), so just leave unspecified
+            #  count: 1
