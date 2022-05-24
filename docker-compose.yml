@@ -8,12 +8,9 @@ services:
       #   VCS_REF: ...
       #   BUILD_DATE: ...
 
-    image: bertsky/ocrd_controller
+    image: ${CONTROLLER_IMAGE}
 
-    hostname: ocrd_controller
-
-    # all local adaptation / customization:
-    env_file: .env
+    hostname: ${CONTROLLER_HOST}
 
     environment:
       - UID=${CONTROLLER_ENV_UID}
