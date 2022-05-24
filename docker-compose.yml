@@ -8,18 +8,16 @@ services:
       #   VCS_REF: ...
       #   BUILD_DATE: ...
 
-    image: bertsky/ocrd_controller
+    image: ${CONTROLLER_IMAGE}
 
-    hostname: ocrd_controller
-
-    # all local adaptation / customization:
-    env_file: .env
+    hostname: ${CONTROLLER_HOST}
 
     environment:
       - UID=${CONTROLLER_ENV_UID}
       - GID=${CONTROLLER_ENV_GID}
       - UMASK=${CONTROLLER_ENV_UMASK}
       - WORKERS=${CONTROLLER_WORKERS}
+      - NVIDIA_DISABLE_REQUIRE=1
 
     ports:
       - ${CONTROLLER_PORT_SSH}:22
@@ -39,4 +37,3 @@ services:
         reservations:
           devices:
             - capabilities: [gpu]
-              count: 1 # share GPU device across workers (for multi-GPU: use swarm)
