@@ -19,7 +19,7 @@
    * [Data transfer](#data-transfer)
    * [Parallel options](#parallel-options)
    * [Logging](#logging)
-   * [Visualization](#visualization)
+ * [See also](#see-also)
 
 
 ## Usage
@@ -134,3 +134,8 @@ Thus, commands will get queued but not processed until a 'worker' is free.
 All logs are accumulated on standard output, which can be inspected via Docker:
 
     docker logs ocrd_controller
+
+## See also
+
+- [Meta-repo for integration of Kitodo.Production with OCR-D in Docker](https://github.com/markusweigelt/kitodo_production_ocrd)
+- [Sister component OCR-D Manager](https://github.com/markusweigelt/ocrd_manager)
