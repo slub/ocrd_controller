@@ -18,8 +18,8 @@ services:
       - UMASK=${CONTROLLER_ENV_UMASK}
       - WORKERS=${CONTROLLER_WORKERS}
 
-    ports:
-      - ${CONTROLLER_PORT_SSH}:22
+    expose:
+      - "22"
 
     volumes:
       - type: bind
