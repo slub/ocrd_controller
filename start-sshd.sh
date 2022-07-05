@@ -14,14 +14,17 @@ mkdir -p /.parallel
 chown -R $UID:$GID /.parallel
 chmod go-rwx /.ssh/*
 chown $UID:$GID /.ssh/*
-echo ocrd:x:$UID:$GID:SSH user:/:/bin/bash >> /etc/passwd
+echo ocrd:x:$UID:$GID:SSH OCR user:/:/bin/bash >> /etc/passwd
+echo admin:x:$UID:$GID:SSH control user:/:/bin/bash >> /etc/passwd
 echo ocrd:*:19020:0:99999:7::: >> /etc/shadow
+echo admin:*:19020:0:99999:7::: >> /etc/shadow
 
 # wait for WORKERS semaphore before continuing (to prevent oversubscription)
 # "wait $$" is not allowed, because sem runs it in a subshell of $$
 # (so instead, we use tail --pid)
 # also, we cannot use $$ directly, because SSHRC is not sourced but execd
 # (so instead, we use the parent of the parent PID)
+echo 'test x$USER != xocrd && exit' >> /.ssh/rc
 echo 'parent=$(cat /proc/$PPID/stat | cut -d\  -f4)' >> /.ssh/rc
 echo "workers=${WORKERS:-1}" >> /.ssh/rc
 echo 'sem --will-cite -j $workers --bg --id ocrd_controller_job tail --pid $parent -f /dev/null' >> /.ssh/rc

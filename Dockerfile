@@ -43,7 +43,7 @@ RUN echo PrintMotd no >> /etc/ssh/sshd_config
 RUN echo PermitUserEnvironment yes >> /etc/ssh/sshd_config
 RUN echo PermitUserRC yes >> /etc/ssh/sshd_config
 RUN echo X11Forwarding no >> /etc/ssh/sshd_config
-RUN echo AllowUsers ocrd >> /etc/ssh/sshd_config
+RUN echo AllowUsers ocrd admin >> /etc/ssh/sshd_config
 # chdir to the data volume (so relative paths work as expected)
 RUN echo "cd /data" >> /etc/profile
 RUN echo 'umask $UMASK' >> /etc/profile
