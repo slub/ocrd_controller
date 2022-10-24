@@ -6,7 +6,7 @@ on:
     branches: [ "master" ]
 
 env:
-  REGISTRY_PATH: ghcr.io/bertsky
+  REGISTRY_PATH: ghcr.io/slub
 
 jobs:
 
