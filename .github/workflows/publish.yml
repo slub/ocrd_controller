@@ -2,9 +2,7 @@ name: Publish OCR-D Controller
 on:
   push:
     branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
-
+    
 env:
   REGISTRY_PATH: ghcr.io/slub
 
