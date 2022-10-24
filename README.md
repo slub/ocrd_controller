@@ -28,7 +28,7 @@
 
 Build or pull the Docker image:
 
-    make build # or docker pull bertsky/ocrd_controller
+    make build # or docker pull ghcr.io/slub/ocrd_controller
 
 ### Starting and mounting
 

@@ -10,7 +10,7 @@ ARG BUILD_DATE
 LABEL \
     maintainer="https://slub-dresden.de" \
     org.label-schema.vcs-ref=$VCS_REF \
-    org.label-schema.vcs-url="https://github.com/bertsky/ocrd_controller" \
+    org.label-schema.vcs-url="https://github.com/slub/ocrd_controller" \
     org.label-schema.build-date=$BUILD_DATE
 
 # keep PREFIX and VIRTUAL_ENV from ocrd/all

@@ -1,4 +1,4 @@
-TAGNAME ?= bertsky/ocrd_controller
+TAGNAME ?= ghcr.io/slub/ocrd_controller
 SHELL = /bin/bash
 
 build:
