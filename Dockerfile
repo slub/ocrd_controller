@@ -13,7 +13,7 @@ LABEL \
     org.label-schema.vcs-url="https://github.com/slub/ocrd_controller" \
     org.label-schema.build-date=$BUILD_DATE
 
-# keep PREFIX and VIRTUAL_ENV from ocrd/all
+# keep PREFIX and VIRTUAL_ENV from ocrd/all (i.e. /usr/local)
 # but export them for COPY etc
 ENV PREFIX=$PREFIX
 ENV VIRTUAL_ENV=$VIRTUAL_ENV
@@ -21,8 +21,12 @@ ENV HOME=/
 
 # must mount a host-side directory for ocrd-resources
 VOLUME /models
+# override XDG_DATA_HOME from ocrd/all (i.e. /usr/local/share)
 ENV XDG_DATA_HOME=/models
+# override TESSDATA_PREFIX from ocrd/all
 ENV TESSDATA_PREFIX=$XDG_DATA_HOME/ocrd-resources/ocrd-tesserocr-recognize
+RUN mkdir $TESSDATA_PREFIX
+RUN mv /usr/local/share/tessdata/*.traineddata $TESSDATA_PREFIX
 # must mount a host-side directory for ocrd/resource.yml
 VOLUME /config
 ENV XDG_CONFIG_HOME=/config
@@ -55,16 +59,6 @@ EXPOSE 22
 WORKDIR /build
 
 RUN ln /usr/bin/python3 /usr/bin/python
-# prevent make from updating the git modules automatically
-ENV NO_UPDATE=1
-#
-# update to core#652 (workflow server)
-RUN git -C core fetch origin pull/652/head:workflow-server
-RUN git -C core checkout workflow-server
-RUN for venv in $VIRTUAL_ENV $VIRTUAL_ENV/sub-venv/*; do . $venv/bin/activate && make -C core install PIP_INSTALL="pip install -e"; done
-# update ocrd-import
-RUN git -C workflow-configuration pull origin master
-RUN . $VIRTUAL_ENV/bin/activate && make -C workflow-configuration install
 # configure writing to ocrd.log for profiling
 COPY ocrd_logging.conf /etc
 
