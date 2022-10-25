@@ -15,7 +15,6 @@
    * [Starting and mounting](#starting-and-mounting)
    * [General management](#general-management)
    * [Processing](#processing)
-     * [Workflow server](#workflow-server)
    * [Data transfer](#data-transfer)
    * [Parallel options](#parallel-options)
    * [Logging](#logging)
@@ -86,19 +85,6 @@ Subsequently, you can use these models on your `DATA` files:
     # or equivalently:
     ssh -p 8022 ocrd@controller "ocrd-tesserocr-recognize -m some-document/mets.xml -P segmentation_level region -P model Fraktur"
 
-#### Workflow server
-
-Currently, the OCR-D installation hosts an implementation of the [workflow server](https://github.com/OCR-D/core/pull/652),
-which can be used to significantly reduce initialization overhead when running the same workflow repeatedly
-on many workspaces (especially with GPU-bound processors):
-
-    ssh -p 8022 ocrd@controller "ocrd workflow server -j 4 -t 120 'tesserocr-recognize -P segmentation_level region -P model Fraktur'"
-
-And subsequently:
-
-    ssh -p 8022 ocrd@controller "ocrd workflow client process -m some-document/mets.xml"
-    ssh -p 8022 ocrd@controller "ocrd workflow client process -m other-document/mets.xml"
-
 ### Data transfer
 
 If your data files cannot be directly mounted on the host (not even as a network share),
@@ -122,7 +108,6 @@ For parallel processing, you can either
   - issueing parallel commands – 
     * via basic shell scripting
     * via [ocrd-make](https://bertsky.github.io/workflow-configuration) calls
-    * via [`ocrd workflow server --processes`](#workflow-server) concurrency
 - run processes on multiple controllers.
 
 Note: internally, `WORKERS` is implemented as a (GNU parallel-based) semaphore
