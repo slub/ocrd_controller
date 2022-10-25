@@ -25,8 +25,6 @@ VOLUME /models
 ENV XDG_DATA_HOME=/models
 # override TESSDATA_PREFIX from ocrd/all
 ENV TESSDATA_PREFIX=$XDG_DATA_HOME/ocrd-resources/ocrd-tesserocr-recognize
-RUN mkdir $TESSDATA_PREFIX
-RUN mv /usr/local/share/tessdata/*.traineddata $TESSDATA_PREFIX
 # must mount a host-side directory for ocrd/resource.yml
 VOLUME /config
 ENV XDG_CONFIG_HOME=/config
