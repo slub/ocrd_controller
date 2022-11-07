@@ -104,8 +104,8 @@ Analogously, to transfer the results back:
 
 For parallel processing, you can either
 - run multiple processes on a single controller by
-  - logging in multiple times, or 
-  - issueing parallel commands – 
+  - logging in multiple times, or
+  - issuing parallel commands –
     * via basic shell scripting
     * via [ocrd-make](https://bertsky.github.io/workflow-configuration) calls
 - run processes on multiple controllers.
