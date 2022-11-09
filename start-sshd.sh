@@ -3,7 +3,7 @@
 # copy the mounted credentials into the user dir
 cat /authorized_keys >> /.ssh/authorized_keys
 
-mkdir $TESSDATA_PREFIX
+mkdir -p $TESSDATA_PREFIX
 ln -t $TESSDATA_PREFIX /usr/local/share/tessdata/*.traineddata
 
 # silence the greeting
