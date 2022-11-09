@@ -4,7 +4,7 @@
 cat /authorized_keys >> /.ssh/authorized_keys
 
 mkdir -p $TESSDATA_PREFIX
-ln -sf /usr/local/share/tessdata/*.traineddata $TESSDATA_PREFIX
+cp /usr/local/share/tessdata/*.traineddata $TESSDATA_PREFIX/
 
 # silence the greeting
 touch /.hushlogin
