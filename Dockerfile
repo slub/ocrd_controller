@@ -28,6 +28,8 @@ ENV TESSDATA_PREFIX=$XDG_DATA_HOME/ocrd-resources/ocrd-tesserocr-recognize
 # must mount a host-side directory for ocrd/resource.yml
 VOLUME /config
 ENV XDG_CONFIG_HOME=/config
+# enable caching of METS structures in processors
+ENV OCRD_METS_CACHING=true
 
 # make apt run non-interactive during build
 ENV DEBIAN_FRONTEND noninteractive
