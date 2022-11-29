@@ -29,7 +29,8 @@ ENV TESSDATA_PREFIX=$XDG_DATA_HOME/ocrd-resources/ocrd-tesserocr-recognize
 VOLUME /config
 ENV XDG_CONFIG_HOME=/config
 # enable caching of METS structures in processors
-ENV OCRD_METS_CACHING=true
+# disable while broken, see OCR-D/core#957
+#ENV OCRD_METS_CACHING=true
 
 # make apt run non-interactive during build
 ENV DEBIAN_FRONTEND noninteractive
