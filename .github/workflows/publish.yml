@@ -2,6 +2,8 @@ name: Publish OCR-D Controller
 on:
   push:
     branches: [ "master" ]
+  schedule:
+     - cron: '0 0 * * 0'
 
 env:
   REGISTRY_PATH: ghcr.io/slub
