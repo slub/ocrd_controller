@@ -44,11 +44,11 @@ jobs:
         build-args: |
           BUILD_DATE=${{ env.build_date }}
           VCS_REF=${{ env.vcs_ref }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max  
+        cache-from: type=gha,scope=ocrd_controller-latest
+        cache-to: type=gha,mode=max,scope=ocrd_controller-latest
 
     - name: Build the stable OCR-D Controller image and deploy to GitHub Container Repository
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v4
       with:
         context: .
         push: true
@@ -57,5 +57,5 @@ jobs:
           BUILD_DATE=${{ env.build_date }}
           VCS_REF=${{ env.vcs_ref }}
           VERSION=${{ env.STABLE_VERSION }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+        cache-from: type=gha,scope=ocrd_controller-stable
+        cache-to: type=gha,mode=max,scope=ocrd_controller-stable
