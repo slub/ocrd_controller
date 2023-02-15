@@ -4,11 +4,13 @@ on:
     branches: [ "master" ]
   schedule:
      - cron: '0 0 * * 0' # run weekly
+  release:
+    types: [published]
   workflow_dispatch: # run manually
 
 env:
   REGISTRY_PATH: ghcr.io/slub
-  STABLE_VERSION: 2023-02-07 # manually adjusted when tested https://github.com/slub/ocrd_kitodo
+  OCRD_ALL_VERSION: '2023-02-07' # manually adjusted
 
 jobs:
 
@@ -37,7 +39,7 @@ jobs:
         echo "vcs_tag=`git describe --always --tags --abbrev=0 HEAD 2>/dev/null`" >> $GITHUB_ENV
 
     - name: Build the latest OCR-D Controller image and deploy to GitHub Container Repository
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v4
       with:
         context: .
         push: true
@@ -49,6 +51,7 @@ jobs:
         cache-to: type=gha,mode=max
 
     - name: Build the stable OCR-D Controller image and deploy to GitHub Container Repository
+      if: github.event_name == 'release'
       uses: docker/build-push-action@v4
       with:
         context: .
@@ -57,6 +60,6 @@ jobs:
         build-args: |
           BUILD_DATE=${{ env.build_date }}
           VCS_REF=${{ env.vcs_ref }}
-          VERSION=${{ env.STABLE_VERSION }}
+          VERSION=${{ env.OCRD_ALL_VERSION }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
