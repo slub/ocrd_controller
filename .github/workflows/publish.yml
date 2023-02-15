@@ -8,6 +8,7 @@ on:
 
 env:
   REGISTRY_PATH: ghcr.io/slub
+  STABLE_VERSION: 2023-02-07 # manually adjusted when tested https://github.com/slub/ocrd_kitodo
 
 jobs:
 
@@ -34,7 +35,7 @@ jobs:
         date -u +"build_date=%Y-%m-%dT%H:%M:%SZ" >> $GITHUB_ENV
         echo "vcs_ref=`git rev-parse --short HEAD`" >> $GITHUB_ENV
 
-    - name: Build the OCR-D Controller image and deploy to GitHub Container Repository
+    - name: Build the latest OCR-D Controller image and deploy to GitHub Container Repository
       uses: docker/build-push-action@v3
       with:
         context: .
@@ -44,5 +45,17 @@ jobs:
           BUILD_DATE=${{ env.build_date }}
           VCS_REF=${{ env.vcs_ref }}
         cache-from: type=gha
-        cache-to: type=gha,mode=max  
-    
+        cache-to: type=gha,mode=max
+
+    - name: Build the stable OCR-D Controller image and deploy to GitHub Container Repository
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        push: true
+        tags: ${{ env.REGISTRY_PATH }}/ocrd_controller:stable
+        build-args: |
+          BUILD_DATE=${{ env.build_date }}
+          VCS_REF=${{ env.vcs_ref }}
+          VERSION=${{ env.STABLE_VERSION }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
