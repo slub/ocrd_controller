@@ -34,6 +34,7 @@ jobs:
       run: |
         date -u +"build_date=%Y-%m-%dT%H:%M:%SZ" >> $GITHUB_ENV
         echo "vcs_ref=`git rev-parse --short HEAD`" >> $GITHUB_ENV
+        echo "vcs_tag=`git describe --tags --abbrev=0 2>/dev/null`" >> $GITHUB_ENV
 
     - name: Build the latest OCR-D Controller image and deploy to GitHub Container Repository
       uses: docker/build-push-action@v3
@@ -52,7 +53,7 @@ jobs:
       with:
         context: .
         push: true
-        tags: ${{ env.REGISTRY_PATH }}/ocrd_controller:stable
+        tags: ${{ env.REGISTRY_PATH }}/ocrd_controller:stable,${{ env.REGISTRY_PATH }}/ocrd_controller:${{ env.vcs_tag }}
         build-args: |
           BUILD_DATE=${{ env.build_date }}
           VCS_REF=${{ env.vcs_ref }}
