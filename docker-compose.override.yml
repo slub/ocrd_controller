@@ -1,0 +1,7 @@
+version: "3.9"
+services:
+
+  ocrd-controller:
+
+    ports:
+      - ${CONTROLLER_PORT_SSH}:22
