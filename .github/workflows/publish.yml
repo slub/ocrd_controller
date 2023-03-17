@@ -20,13 +20,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - uses: actions/checkout@v3
+
+    - name: Run read-yaml action
+      if: endsWith(github.ref, '/stable')
+      id: docker-compose-data
+      uses: jbutcher5/read-yaml@1.6
+      with:
+        file: './docker-compose.yml'
+        key-path: '["services", "ocrd-controller", "args", "VERSION"]'
+        
     - name: Set environment variables for the stable version
       if: endsWith(github.ref, '/stable')
       run: |
         echo "IMAGE_TAG=stable" >> $GITHUB_ENV
-        echo "OCRD_ALL_VERSION=2023-02-07" >> $GITHUB_ENV
-      
-    - uses: actions/checkout@v3
+        echo "OCRD_ALL_VERSION=${{ steps.docker-compose-data.outputs.data }}" >> $GITHUB_ENV
 
     - # Activate cache export feature to reduce build time of images
       name: Set up Docker Buildx
