@@ -28,7 +28,7 @@ jobs:
       uses: jbutcher5/read-yaml@1.6
       with:
         file: './docker-compose.yml'
-        key-path: '["services", "ocrd-controller", "args", "VERSION"]'
+        key-path: '["services", "ocrd-controller", "build", "args", "VERSION"]'
         
     - name: Set environment variables for the stable version
       if: endsWith(github.ref, '/stable')
