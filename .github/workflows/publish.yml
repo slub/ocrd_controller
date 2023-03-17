@@ -1,16 +1,17 @@
 name: Publish OCR-D Controller
 on:
   push:
-    branches: [ "master" ]
+    branches: 
+      - master
+      - stable
   schedule:
      - cron: '0 0 * * 0' # run weekly
-  release:
-    types: [published]
   workflow_dispatch: # run manually
 
 env:
+  IMAGE_TAG: latest
+  OCRD_ALL_VERSION: 'maximum-git'
   REGISTRY_PATH: ghcr.io/slub
-  OCRD_ALL_VERSION: '2023-02-07' # manually adjusted
 
 jobs:
 
@@ -20,6 +21,20 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+
+    - name: Run read-yaml action
+      if: endsWith(github.ref, '/stable')
+      id: docker-compose-data
+      uses: jbutcher5/read-yaml@1.6
+      with:
+        file: './docker-compose.yml'
+        key-path: '["services", "ocrd-controller", "args", "VERSION"]'
+        
+    - name: Set environment variables for the stable version
+      if: endsWith(github.ref, '/stable')
+      run: |
+        echo "IMAGE_TAG=stable" >> $GITHUB_ENV
+        echo "OCRD_ALL_VERSION=${{ steps.docker-compose-data.outputs.data }}" >> $GITHUB_ENV
 
     - # Activate cache export feature to reduce build time of images
       name: Set up Docker Buildx
@@ -43,20 +58,7 @@ jobs:
       with:
         context: .
         push: true
-        tags: ${{ env.REGISTRY_PATH }}/ocrd_controller:latest
-        build-args: |
-          BUILD_DATE=${{ env.build_date }}
-          VCS_REF=${{ env.vcs_ref }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-
-    - name: Build the stable OCR-D Controller image and deploy to GitHub Container Repository
-      if: github.event_name == 'release'
-      uses: docker/build-push-action@v4
-      with:
-        context: .
-        push: true
-        tags: ${{ env.REGISTRY_PATH }}/ocrd_controller:stable,${{ env.REGISTRY_PATH }}/ocrd_controller:${{ github.ref_name }}
+        tags: ${{ env.REGISTRY_PATH }}/ocrd_controller:${{ env.IMAGE_TAG }}
         build-args: |
           BUILD_DATE=${{ env.build_date }}
           VCS_REF=${{ env.vcs_ref }}
