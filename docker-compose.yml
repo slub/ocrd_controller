@@ -5,7 +5,7 @@ services:
     build:
       context: .
       args:
-        - VERSION='2023-02-07'
+        VERSION: '2023-02-07'
       #   VCS_REF: ...
       #   BUILD_DATE: ...
 
