@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps: 
-    - name: Checkout
+    - name: Checkout without input reference (default)
       uses: actions/checkout@v3
       if: github.event.inputs.checkout-ref == ''
     
@@ -44,7 +44,7 @@ jobs:
         echo "vcs_ref=`git rev-parse --short HEAD`" >> $GITHUB_ENV
         echo "vcs_tag=`git describe --always --tags --abbrev=0 HEAD 2>/dev/null`" >> $GITHUB_ENV
 
-    - name: Build the latest OCR-D Controller image and deploy to GitHub Container Repository
+    - name: Build the OCR-D Controller image (ghcr.io/slub/ocrd_controller:${{ github.event.inputs.image-tag }}) and deploy to GitHub Container Repository
       uses: docker/build-push-action@v4
       with:
         context: .
