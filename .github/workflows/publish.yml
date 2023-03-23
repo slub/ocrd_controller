@@ -1,34 +1,19 @@
-name: Publish OCR-D Controller
+name: Publish OCR-D Controller image
+
 on:
   workflow_dispatch:
-  
-env:
-  IMAGE_TAG: latest
-  OCRD_ALL_VERSION: 'maximum-git'
-  REGISTRY_PATH: ghcr.io/slub
+    inputs:
+      image-tag: 
+        default: 'latest'
+      ocrd-all-version: 
+        default: 'maximum-git'  
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
-
-    - name: Run read-yaml action
-      if: endsWith(github.ref, '/stable')
-      id: docker-compose-data
-      uses: jbutcher5/read-yaml@1.6
-      with:
-        file: './docker-compose.yml'
-        key-path: '["services", "ocrd-controller", "build", "args", "VERSION"]'
-        
-    - name: Set environment variables for the stable version
-      if: endsWith(github.ref, '/stable')
-      run: |
-        echo "IMAGE_TAG=stable" >> $GITHUB_ENV
-        echo "OCRD_ALL_VERSION=${{ steps.docker-compose-data.outputs.data }}" >> $GITHUB_ENV
 
     - # Activate cache export feature to reduce build time of images
       name: Set up Docker Buildx
@@ -52,10 +37,10 @@ jobs:
       with:
         context: .
         push: true
-        tags: ${{ env.REGISTRY_PATH }}/ocrd_controller:${{ env.IMAGE_TAG }}
+        tags: ghcr.io/slub/ocrd_controller:${{ github.event.inputs.image-tag }}
         build-args: |
           BUILD_DATE=${{ env.build_date }}
           VCS_REF=${{ env.vcs_ref }}
-          VERSION=${{ env.OCRD_ALL_VERSION }}
+          VERSION=${{ github.event.inputs.ocrd-all-version }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
