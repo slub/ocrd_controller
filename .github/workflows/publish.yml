@@ -1,4 +1,4 @@
-name: Publish OCR-D Controller image
+name: Publish OCR-D Controller
 
 on:
   workflow_dispatch:
