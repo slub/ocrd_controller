@@ -3,17 +3,29 @@ name: Publish OCR-D Controller image
 on:
   workflow_dispatch:
     inputs:
-      image-tag: 
+      checkout-ref:
+        description: The branch, tag or SHA to checkout. Otherwise, uses the default branch.
+      image-tag:
+        description: Tag name of Docker image
         default: 'latest'
       ocrd-all-version: 
+        description: Tag of ocrd/all from stage
         default: 'maximum-git'  
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
-    steps:
-    - uses: actions/checkout@v3
+    steps: 
+    - name: Checkout
+      uses: actions/checkout@v3
+      if: github.event.inputs.checkout-ref == ''
+    
+    - name: Checkout input reference ${{ github.event.inputs.checkout-ref }}
+      uses: actions/checkout@v3
+      if: github.event.inputs.checkout-ref != ''
+      with:
+        ref: ${{ github.event.inputs.checkout-ref }}
 
     - # Activate cache export feature to reduce build time of images
       name: Set up Docker Buildx
