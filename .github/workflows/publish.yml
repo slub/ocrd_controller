@@ -17,6 +17,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps: 
+    - name: Maximize build space
+      uses: easimon/maximize-build-space@master
+      with:
+        root-reserve-mb: 512
+        swap-size-mb: 1024
+        remove-dotnet: 'true'
+    
     - name: Checkout without input reference (default)
       uses: actions/checkout@v3
       if: github.event.inputs.checkout-ref == ''
