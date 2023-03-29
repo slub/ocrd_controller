@@ -65,4 +65,4 @@ jobs:
           VCS_REF=${{ env.vcs_ref }}
           VERSION=${{ github.event.inputs.ocrd-all-version }}
         cache-from: type=gha
-        cache-to: type=gha,mode=max
+        cache-to: type=gha,mode=min
