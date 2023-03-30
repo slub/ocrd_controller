@@ -64,5 +64,6 @@ jobs:
           BUILD_DATE=${{ env.build_date }}
           VCS_REF=${{ env.vcs_ref }}
           VERSION=${{ github.event.inputs.ocrd-all-version }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=min
+        # Don't use cache cause ocrd/all from stage is to large
+        #cache-from: type=gha 
+        #cache-to: type=gha,mode=min
