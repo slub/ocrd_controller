@@ -10,7 +10,10 @@ on:
         default: 'latest'
       ocrd-all-version: 
         description: Tag of ocrd/all from stage
-        default: 'maximum-git'  
+        default: 'maximum-git'
+        
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository }}        
 
 jobs:
   build-deploy:
@@ -54,12 +57,18 @@ jobs:
         echo "vcs_ref=`git rev-parse --short HEAD`" >> $GITHUB_ENV
         echo "vcs_tag=`git describe --always --tags --abbrev=0 HEAD 2>/dev/null`" >> $GITHUB_ENV
 
-    - name: Build the OCR-D Controller image (ghcr.io/slub/ocrd_controller:${{ github.event.inputs.image-tag }}) and deploy to GitHub Container Repository
+    - name: Determine vcs_ref lable of current image (${{ env.IMAGE_NAME }}:${{ github.event.inputs.image-tag }})
+      run: |
+       docker pull ${{ env.IMAGE_NAME }}:${{ github.event.inputs.image-tag }}   
+       echo current_vcs_ref=`docker inspect ${{ env.IMAGE_NAME }}:${{ github.event.inputs.image-tag }} | jq -r '.[0].Config.Labels | ."org.label-schema.vcs-ref"'` >> $GITHUB_ENV
+
+    - name: Build the OCR-D Controller image (${{ env.IMAGE_NAME }}:${{ github.event.inputs.image-tag }}) and deploy to GitHub Container Repository
+      if: ${{env.vcs_ref != env.current_vcs_ref}}
       uses: docker/build-push-action@v4
       with:
         context: .
         push: true
-        tags: ghcr.io/slub/ocrd_controller:${{ github.event.inputs.image-tag }}
+        tags: ${{ env.IMAGE_NAME }}:${{ github.event.inputs.image-tag }}
         build-args: |
           BUILD_DATE=${{ env.build_date }}
           VCS_REF=${{ env.vcs_ref }}
