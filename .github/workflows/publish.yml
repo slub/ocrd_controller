@@ -80,7 +80,7 @@ jobs:
           org.opencontainers.image.created=${{ env.build_date }}
         tags: ${{ github.event.inputs.image-tag }}
 
-    - name: Build the OCR-D Controller image (${{ env.IMAGE_NAME }}:${{ github.event.inputs.image-tag }}) and deploy to GitHub Container Repository
+    - name: Build the OCR-D Controller image "${{ env.IMAGE_NAME }}:${{ github.event.inputs.image-tag }}" and deploy to GitHub Container Repository
       if: steps.cache.outputs.cache-hit != 'true'
       uses: docker/build-push-action@v4
       with:
