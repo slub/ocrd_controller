@@ -13,7 +13,8 @@ on:
         default: 'maximum-git'
         
 env:
-  IMAGE_NAME: ghcr.io/${{ github.repository }}        
+  IMAGE_NAME: ghcr.io/${{ github.repository }}
+  BASE_NAME: ocrd/all:${{ github.event.inputs.ocrd-all-version }}
 
 jobs:
   build-deploy:
@@ -44,6 +45,7 @@ jobs:
       run: |
         date -u +"build_date=%Y-%m-%dT%H:%M:%SZ" >> $GITHUB_ENV
         echo "vcs_ref=`git rev-parse --short HEAD`" >> $GITHUB_ENV
+        echo "base_digest=`docker image inspect  --format '{{.Id}}' ${{ env.BASE_NAME }}`" >> $GITHUB_ENV
         echo "cache_key=${{ github.event.inputs.image-tag }}-${{ github.event.inputs.ocrd-all-version }}-${{ env.vcs_ref }}" >> $GITHUB_ENV # (input image-tag - ocrd-all-version - vcs_ref)
         echo "${{ env.vcs_ref }}" > /tmp/${{ github.event.inputs.image-tag }}-vcs-ref # temporary file to fill cache
 
@@ -76,9 +78,12 @@ jobs:
         images: ${{ env.IMAGE_NAME }}
         labels: |
           org.opencontainers.image.title=OCR-D Controller
+          org.opencontainers.image.source=${{ github.repositoryUrl }}
           org.opencontainers.image.version=${{ github.event.inputs.image-tag }}
           org.opencontainers.image.revision=${{ env.vcs_ref }}
           org.opencontainers.image.created=${{ env.build_date }}
+          org.opencontainers.image.base.name=${{ env.BASE_NAME }}
+          org.opencontainers.image.base.digest=${{ env.base_digest }}
         tags: ${{ github.event.inputs.image-tag }}
 
     - name: Build the OCR-D Controller image "${{ env.IMAGE_NAME }}:${{ github.event.inputs.image-tag }}" and deploy to GitHub Container Repository
