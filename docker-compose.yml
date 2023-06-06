@@ -17,6 +17,8 @@ services:
       - GID=${CONTROLLER_ENV_GID}
       - UMASK=${CONTROLLER_ENV_UMASK}
       - WORKERS=${CONTROLLER_WORKERS}
+      # set GPU count=all (should already be set by image):
+      - NVIDIA_VISIBLE_DEVICES=all
 
     volumes:
       - type: bind
@@ -39,5 +41,3 @@ services:
             # but the semantics of "count" is _at least_ unfortunately
             # (which would fail on CPU-only systems), so just leave unspecified
             #  count: 1
-            # update: default count:all does not work anymore, so make explicit
-              count: all
