@@ -17,8 +17,6 @@ services:
       - GID=${CONTROLLER_ENV_GID}
       - UMASK=${CONTROLLER_ENV_UMASK}
       - WORKERS=${CONTROLLER_WORKERS}
-      # set GPU count=all (should already be set by image):
-      - NVIDIA_VISIBLE_DEVICES=all
 
     volumes:
       - type: bind
