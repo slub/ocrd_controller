@@ -10,7 +10,7 @@ on:
         default: 'latest'
       ocrd-all-version: 
         description: Tag of ocrd/all from stage
-        default: 'maximum-git'
+        default: 'maximum-cuda'
         
 env:
   IMAGE_NAME: ghcr.io/${{ github.repository }}        
