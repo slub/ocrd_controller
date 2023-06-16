@@ -55,7 +55,7 @@ jobs:
         key: ${{ env.cache_key }}
         lookup-only: true
 
-    - # Activate cache export feature to reduce build time of images
+    - # Activate cache to reduce build time of images
       name: Set up Docker Buildx
       if: steps.cache.outputs.cache-hit != 'true'
       uses: docker/setup-buildx-action@v2
