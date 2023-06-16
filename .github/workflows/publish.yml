@@ -44,8 +44,8 @@ jobs:
       run: |
         date -u +"build_date=%Y-%m-%dT%H:%M:%SZ" >> $GITHUB_ENV
         echo "vcs_ref=`git rev-parse --short HEAD`" >> $GITHUB_ENV
-        echo "cache_key=${{ github.event.inputs.image-tag }}-${{ github.event.inputs.ocrd-all-version }}-${{ env.vcs_ref }}" >> $GITHUB_ENV # (input image-tag - ocrd-all-version - vcs_ref)
-        echo "${{ env.vcs_ref }}" > /tmp/${{ github.event.inputs.image-tag }}-vcs-ref # temporary file to fill cache
+        echo "cache_key=${{ github.event.inputs.image-tag }}-${{ github.event.inputs.ocrd-all-version }}-$vcs_ref" >> $GITHUB_ENV # (input image-tag - ocrd-all-version - vcs_ref)
+        echo "$vcs_ref" > /tmp/${{ github.event.inputs.image-tag }}-vcs-ref # temporary file to fill cache
 
     - name: Get cache key "${{ env.cache_key }}"
       uses: actions/cache/restore@v3
