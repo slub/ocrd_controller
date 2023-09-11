@@ -125,9 +125,9 @@ All logs are accumulated on standard output, which can be inspected via Docker:
 - [Meta-repo for integration of Kitodo.Production with OCR-D in Docker](https://github.com/slub/ocrd_kitodo)
 - [Sister component OCR-D Manager](https://github.com/slub/ocrd_manager)
 
-## Maintainers
+## Maintainer
 
-If you have any questions or encounter any problems, please do not hesitate to contact us.
+If you have any questions or encounter any problems, please do not hesitate to contact me.
 
 - [Robert Sachunsky](https://github.com/bertsky)
 
