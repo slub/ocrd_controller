@@ -30,7 +30,7 @@ echo admin:*:19020:0:99999:7::: >> /etc/shadow
 # also, we cannot use $$ directly, because SSHRC is not sourced but execd
 # (so instead, we use the parent of the parent PID)
 echo 'test x$USER != xocrd && exit' >> /.ssh/rc
-echo 'parent=$(ps -o ppid= $PPID)' >> /.ssh/rc
+echo 'parent=$(ps -o ppid:1= $PPID)' >> /.ssh/rc
 echo "workers=${WORKERS:-1}" >> /.ssh/rc
 echo 'sem --will-cite -j $workers --bg --id ocrd_controller_job tail --pid $parent -f /dev/null' >> /.ssh/rc
 
@@ -39,13 +39,13 @@ echo 'sem --will-cite -j $workers --bg --id ocrd_controller_job tail --pid $pare
 
 fi
 
+# start Syslog in the background
+service rsyslog start
+
 # start OpenSSH in the background
 #/usr/sbin/sshd -D -e
 service ssh start
 
-# start Syslog in the background
-service rsyslog start
-sleep 1
-
 # show Syslog in the foreground (for easy "docker logs" passing)
+sleep 1
 tail -f /var/log/syslog
