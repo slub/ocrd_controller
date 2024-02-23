@@ -1,67 +1,93 @@
 name: Publish OCR-D Controller
-on:
-  push:
-    branches: 
-      - master
-      - stable
-  schedule:
-     - cron: '0 0 * * 0' # run weekly
-  workflow_dispatch: # run manually
 
+on:
+  workflow_dispatch:
+    inputs:
+      checkout-ref:
+        description: The branch, tag or SHA to checkout. Otherwise, uses the default branch.
+      image-tag:
+        description: Tag name of Docker image
+        default: 'latest'
+      ocrd-all-version: 
+        description: Tag of ocrd/all from stage
+        default: 'maximum-cuda'
+        
 env:
-  IMAGE_TAG: latest
-  OCRD_ALL_VERSION: 'maximum-git'
-  REGISTRY_PATH: ghcr.io/slub
+  IMAGE_NAME: ghcr.io/${{ github.repository }}        
 
 jobs:
-
-  build:
-
+  build-deploy:
     runs-on: ubuntu-latest
 
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Run read-yaml action
-      if: endsWith(github.ref, '/stable')
-      id: docker-compose-data
-      uses: jbutcher5/read-yaml@1.6
-      with:
-        file: './docker-compose.yml'
-        key-path: '["services", "ocrd-controller", "build", "args", "VERSION"]'
-        
-    - name: Set environment variables for the stable version
-      if: endsWith(github.ref, '/stable')
+    steps: 
+    - name: Remove unwanted to provide more disk space
+      # https://github.com/marketplace/actions/maximize-build-disk-space
+      # https://github.com/actions/runner-images/issues/2840
       run: |
-        echo "IMAGE_TAG=stable" >> $GITHUB_ENV
-        echo "OCRD_ALL_VERSION=${{ steps.docker-compose-data.outputs.data }}" >> $GITHUB_ENV
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /usr/local/lib/android
+        sudo rm -rf /opt/ghc
+        sudo rm -rf "/usr/local/share/boost"
+        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+    
+    - name: Checkout without input reference (default)
+      uses: actions/checkout@v3
+      if: github.event.inputs.checkout-ref == ''
+    
+    - name: Checkout input reference ${{ github.event.inputs.checkout-ref }}
+      uses: actions/checkout@v3
+      if: github.event.inputs.checkout-ref != ''
+      with:
+        ref: ${{ github.event.inputs.checkout-ref }}
 
-    - # Activate cache export feature to reduce build time of images
+    - name: Determine environment variables
+      run: |
+        date -u +"build_date=%Y-%m-%dT%H:%M:%SZ" >> $GITHUB_ENV
+        LOCAL_VSC_REF=`git rev-parse --short HEAD`
+        echo "vcs_ref=$LOCAL_VSC_REF" >> $GITHUB_ENV
+        echo "cache_key=${{ github.event.inputs.image-tag }}-${{ github.event.inputs.ocrd-all-version }}-$LOCAL_VSC_REF" >> $GITHUB_ENV # (input image-tag - ocrd-all-version - vcs_ref)
+        echo "$LOCAL_VSC_REF" > /tmp/${{ github.event.inputs.image-tag }}-vcs-ref # temporary file to fill cache
+
+    - name: Get cache key "${{ env.cache_key }}"
+      uses: actions/cache/restore@v3
+      id: cache
+      with:
+        path: /tmp/${{ github.event.inputs.image-tag }}-vcs-ref
+        key: ${{ env.cache_key }}
+        lookup-only: true
+
+    - # Activate cache to reduce build time of images
       name: Set up Docker Buildx
+      if: steps.cache.outputs.cache-hit != 'true'
       uses: docker/setup-buildx-action@v2
 
     - name: Login to GitHub Container Registry
+      if: steps.cache.outputs.cache-hit != 'true'
       uses: docker/login-action@v2
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Determine build args
-      run: |
-        date -u +"build_date=%Y-%m-%dT%H:%M:%SZ" >> $GITHUB_ENV
-        echo "vcs_ref=`git rev-parse --short HEAD`" >> $GITHUB_ENV
-        echo "vcs_tag=`git describe --always --tags --abbrev=0 HEAD 2>/dev/null`" >> $GITHUB_ENV
-
-    - name: Build the latest OCR-D Controller image and deploy to GitHub Container Repository
+    - name: Build the OCR-D Controller image "${{ env.IMAGE_NAME }}:${{ github.event.inputs.image-tag }}" and deploy to GitHub Container Repository
+      if: steps.cache.outputs.cache-hit != 'true'
       uses: docker/build-push-action@v4
       with:
         context: .
         push: true
-        tags: ${{ env.REGISTRY_PATH }}/ocrd_controller:${{ env.IMAGE_TAG }}
+        tags: ${{ env.IMAGE_NAME }}:${{ github.event.inputs.image-tag }}
         build-args: |
           BUILD_DATE=${{ env.build_date }}
           VCS_REF=${{ env.vcs_ref }}
-          VERSION=${{ env.OCRD_ALL_VERSION }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+          VERSION=${{ github.event.inputs.ocrd-all-version }}
+        # Don't use cache cause ocrd/all from stage is to large
+        #cache-from: type=gha 
+        #cache-to: type=gha,mode=min
+        
+    - name: Save cache key "${{ env.cache_key }}" 
+      uses: actions/cache/save@v3
+      if: steps.cache.outputs.cache-hit != 'true'
+      with:
+        path: /tmp/${{ github.event.inputs.image-tag }}-vcs-ref
+        key: ${{ env.cache_key }}
+        

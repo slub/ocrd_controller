@@ -21,11 +21,11 @@ services:
 
     volumes:
       - type: bind
-        source: ${CONTROLLER_KEYS} # ocrd manager public key
+        source: ${CONTROLLER_KEYS:-controller-keys-not-defined} # ocrd manager public key
         target: /authorized_keys
-      - ${CONTROLLER_MODELS}:/models # Resource directory
-      - ${CONTROLLER_CONFIG}:/config
-      - ${CONTROLLER_DATA}:/data
+      - ${CONTROLLER_MODELS:-controller-models-not-defined}:/models
+      - ${CONTROLLER_CONFIG:-controller-config-not-defined}:/config
+      - ${CONTROLLER_DATA:-controller-data-not-defined}:/data
 
     deploy:
       resources:

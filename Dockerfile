@@ -4,14 +4,24 @@ ARG VERSION=maximum-git
 # maximum-cuda-git
 FROM ocrd/all:$VERSION
 
-MAINTAINER robert.sachunsky@slub-dresden.de
 ARG VCS_REF
 ARG BUILD_DATE
-LABEL \
-    maintainer="https://slub-dresden.de" \
-    org.label-schema.vcs-ref=$VCS_REF \
-    org.label-schema.vcs-url="https://github.com/slub/ocrd_controller" \
-    org.label-schema.build-date=$BUILD_DATE
+
+MAINTAINER robert.sachunsky@slub-dresden.de
+LABEL maintainer="https://slub-dresden.de"
+LABEL org.label-schema.vendor="Saxon State and University Library Dresden"
+LABEL org.label-schema.name="OCR-D Controller"
+LABEL org.label-schema.vcs-url="https://github.com/slub/ocrd_controller"
+LABEL org.label-schema.vcs-ref=$VCS_REF
+LABEL org.label-schema.build-date=$BUILD_DATE
+LABEL org.opencontainers.image.vendor="Saxon State and University Library Dresden"
+LABEL org.opencontainers.image.title="OCR-D Controller"
+LABEL org.opencontainers.image.description="Path to network implementation of OCR-D"
+LABEL org.opencontainers.image.source="https://github.com/slub/ocrd_controller"
+LABEL org.opencontainers.image.documentation="https://github.com/slub/ocrd_controller/blob/${VCS_REF}/README.md"
+LABEL org.opencontainers.image.revision=$VCS_REF
+LABEL org.opencontainers.image.created=$BUILD_DATE
+LABEL org.opencontainers.image.base.name=ocrd/all:$VERSION
 
 # keep PREFIX and VIRTUAL_ENV from ocrd/all (i.e. /usr/local)
 # but export them for COPY etc
