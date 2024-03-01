@@ -31,12 +31,16 @@ ENV HOME=/
 
 # must mount a host-side directory for ocrd-resources
 VOLUME /models
+# ensure volume can be written by any user
+RUN chmod go+rwx /models
 # override XDG_DATA_HOME from ocrd/all (i.e. /usr/local/share)
 ENV XDG_DATA_HOME=/models
 # override TESSDATA_PREFIX from ocrd/all
 ENV TESSDATA_PREFIX=$XDG_DATA_HOME/ocrd-resources/ocrd-tesserocr-recognize
 # must mount a host-side directory for ocrd/resource.yml
 VOLUME /config
+# ensure volume can be written by any user
+RUN chmod go+rwx /config
 ENV XDG_CONFIG_HOME=/config
 # enable caching of METS structures in processors
 ENV OCRD_METS_CACHING=1
