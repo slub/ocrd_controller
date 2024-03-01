@@ -69,6 +69,13 @@ EXPOSE 22
 
 WORKDIR /build
 
+# workaround for slow ocrd-import due to core#1194
+RUN git -C workflow-configuration pull origin master
+RUN make -C workflow-configuration install
+# fix for broken ocrd workspace find (core#1192) and add (core#1195)
+RUN git -C core fetch origin fix-get-physical-pages
+RUN git -C core checkout fix-get-physical-pages
+
 RUN ln /usr/bin/python3 /usr/bin/python
 # configure writing to ocrd.log for profiling
 COPY ocrd_logging.conf /etc
