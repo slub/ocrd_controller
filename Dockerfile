@@ -6,6 +6,7 @@ FROM ocrd/all:$VERSION
 
 ARG VCS_REF
 ARG BUILD_DATE
+ARG VERSION
 
 MAINTAINER robert.sachunsky@slub-dresden.de
 LABEL maintainer="https://slub-dresden.de"
