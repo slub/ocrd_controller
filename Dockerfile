@@ -77,8 +77,7 @@ WORKDIR /build
 RUN git -C workflow-configuration pull origin master
 RUN make -C workflow-configuration install
 # fix for broken ocrd workspace find (core#1192) and add (core#1195)
-RUN git -C core fetch origin fix-get-physical-pages
-RUN git -C core checkout fix-get-physical-pages
+RUN git -C core pull origin master
 
 RUN ln /usr/bin/python3 /usr/bin/python
 # configure writing to ocrd.log for profiling
