@@ -72,7 +72,13 @@ WORKDIR /build
 RUN git -C workflow-configuration pull origin master
 RUN make -C workflow-configuration install
 # fix for broken ocrd workspace find (core#1192) and add (core#1195)
-RUN git -C core pull origin master
+# now on core:master, but not included in ocrd/all builds yet
+# workaround for ocrd_all#416
+# also using core#1198
+RUN git -C core fetch origin uninstall-workaround
+RUN git -C core checkout FETCH_HEAD
+RUN make -C core uninstall-workaround install-dev
+RUN for venv in /usr/local/sub-venv/*; do . $venv/bin/activate && make -C core uninstall-workaround install-dev; done
 
 RUN ln /usr/bin/python3 /usr/bin/python
 # configure writing to ocrd.log for profiling
