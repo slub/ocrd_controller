@@ -5,9 +5,6 @@ if ! grep -q ^ocrd: /etc/passwd; then
 # copy the mounted credentials into the user dir
 cat /authorized_keys >> /.ssh/authorized_keys
 
-mkdir -p $TESSDATA_PREFIX
-cp /usr/local/share/tessdata/*.traineddata $TESSDATA_PREFIX/
-
 # silence the greeting
 > /.hushlogin
 
